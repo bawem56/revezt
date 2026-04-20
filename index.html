@@ -3,197 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Revezy Pro - Injector</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Kanit:wght@300;500&display=swap" rel="stylesheet">
+    <title>Revezy Studio - Roblox Executor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Chakra+Petch:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent: #ff2a4b;
-            --bg: rgba(15, 15, 18, 0.85);
+            --primary: #ff1e46; /* สีแดงเอกลักษณ์ Revezy */
+            --bg-dark: rgba(12, 12, 16, 0.9);
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --text-main: #f0f0f0;
+            --text-dim: #888;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: default; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
         body {
             height: 100vh;
-            background: transparent; /* สำคัญ: ต้องโปร่งใส */
+            background: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Kanit', sans-serif;
+            font-family: 'Chakra Petch', sans-serif;
             overflow: hidden;
+            color: var(--text-main);
         }
 
-        /* กล่องโปรแกรมหลัก */
-        .window {
-            width: 600px;
-            height: 400px;
-            background: var(--bg);
-            border: 1px solid rgba(255, 42, 75, 0.4);
-            border-radius: 20px; /* ขอบโค้งมนแบบแอปมือโปร */
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 42, 75, 0.1);
+        /* ตัวโปรแกรมหลัก */
+        .executor-window {
+            width: 750px;
+            height: 500px;
+            background: var(--bg-dark);
+            border: 1px solid rgba(255, 30, 70, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(255, 30, 70, 0.05);
             display: flex;
             flex-direction: column;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
         }
 
-        /* แถบด้านบน (ส่วนนี้แหละที่ทำให้เมาส์ลากได้) */
+        /* ส่วนหัว (เอาไว้ลาก) */
         .header {
-            height: 55px;
+            height: 60px;
             padding: 0 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to bottom, rgba(255, 42, 75, 0.15), transparent);
+            background: linear-gradient(90deg, rgba(255, 30, 70, 0.1) 0%, transparent 50%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            -webkit-app-region: drag; /* โค้ดพระเอกที่ทำให้ลากสมูท */
+            -webkit-app-region: drag; /* สำคัญสำหรับ Electron */
         }
 
-        .logo {
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-text {
             font-family: 'Orbitron', sans-serif;
-            font-size: 18px;
+            font-size: 22px;
             font-weight: 900;
-            color: var(--accent);
-            text-shadow: 0 0 10px var(--accent);
+            color: var(--primary);
+            text-shadow: 0 0 15px var(--primary);
             letter-spacing: 2px;
         }
 
-        .status-badge {
-            font-size: 11px;
-            background: rgba(0, 255, 136, 0.1);
-            color: #00ff88;
-            padding: 4px 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 255, 136, 0.3);
-            text-transform: uppercase;
-            -webkit-app-region: no-drag; /* ปุ่มนี้ห้ามลาก */
-        }
-
-        .main { display: flex; flex: 1; -webkit-app-region: no-drag; /* พื้นที่ด้านล่างทั้งหมดห้ามลาก */ }
-
-        .sidebar {
-            width: 170px;
-            padding: 20px 0;
-            background: rgba(0, 0, 0, 0.3);
-            border-right: 1px solid rgba(255, 255, 255, 0.02);
-        }
-
-        .nav-link {
-            padding: 12px 25px;
-            color: #777;
+        .inject-btn {
+            -webkit-app-region: no-drag;
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            padding: 6px 20px;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
             font-size: 14px;
-            transition: 0.3s;
-            border-left: 3px solid transparent;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
         }
 
-        .nav-link.active, .nav-link:hover {
+        .inject-btn:hover, .inject-btn.injected {
+            background: var(--primary);
             color: #fff;
-            background: linear-gradient(to right, rgba(255, 42, 75, 0.15), transparent);
-            border-left: 3px solid var(--accent);
+            box-shadow: 0 0 15px var(--primary);
         }
 
-        .content {
-            flex: 1;
-            padding: 25px;
+        /* เนื้อหาหลัก */
+        .main-layout { display: flex; flex: 1; -webkit-app-region: no-drag; }
+
+        /* แถบเมนูด้านซ้าย */
+        .sidebar {
+            width: 180px;
+            background: rgba(0, 0, 0, 0.4);
+            border-right: 1px solid rgba(255, 255, 255, 0.02);
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 5px;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            color: var(--text-dim);
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 30, 70, 0.1);
+            border-left: 3px solid var(--primary);
+        }
+
+        /* พื้นที่แสดง 10 ฟังก์ชัน (แบบ Grid สวยๆ) */
+        .content-area {
+            flex: 1;
+            padding: 25px;
             overflow-y: auto;
         }
 
-        .option-card {
-            background: rgba(255, 255, 255, 0.03);
+        .script-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* แบ่งเป็น 2 คอลัมน์ */
+            gap: 15px;
+        }
+
+        /* กล่องฟังก์ชันแต่ละอัน */
+        .func-card {
+            background: var(--bg-card);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px 20px;
-            border-radius: 12px;
+            border-radius: 10px;
+            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: 0.2s;
-        }
-
-        .option-card:hover { background: rgba(255, 255, 255, 0.06); }
-
-        .option-info h4 { font-size: 15px; color: #fff; margin-bottom: 3px; }
-        .option-info p { font-size: 12px; color: #888; }
-
-        /* สวิตช์เปิด-ปิด */
-        .toggle {
-            width: 44px;
-            height: 22px;
-            background: #333;
-            border-radius: 50px;
-            position: relative;
-            cursor: pointer;
             transition: 0.3s;
         }
 
-        .toggle.active { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        .func-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 30, 70, 0.3);
+        }
 
-        .toggle::after {
+        .func-info h4 { font-size: 16px; color: #fff; margin-bottom: 2px; }
+        .func-info p { font-size: 12px; color: var(--text-dim); }
+
+        /* สวิตช์ Toggle */
+        .toggle-switch {
+            width: 46px;
+            height: 24px;
+            background: #222;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid #444;
+        }
+
+        .toggle-switch.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        .toggle-switch::after {
             content: '';
             position: absolute;
             width: 16px;
             height: 16px;
-            background: #fff;
+            background: #aaa;
             border-radius: 50%;
             top: 3px; left: 3px;
             transition: 0.3s;
         }
 
-        .toggle.active::after { left: 25px; }
+        .toggle-switch.active::after {
+            left: 25px;
+            background: #fff;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 30, 70, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
     </style>
 </head>
 <body>
 
-<div class="window">
-    <div class="header">
-        <div class="logo">REVEZY ENGINE</div>
-        <div class="status-badge">🟢 UNDETECTED</div>
-    </div>
-    
-    <div class="main">
-        <div class="sidebar">
-            <div class="nav-link active">🎯 AIMBOT</div>
-            <div class="nav-link">👁️ VISUALS</div>
-            <div class="nav-link">⚙️ SETTINGS</div>
+    <div class="executor-window">
+        <div class="header">
+            <div class="brand-container">
+                <div class="logo-text">REVEZY STUDIO</div>
+            </div>
+            <button class="inject-btn" id="injectBtn" onclick="injectRoblox()">ATTACH TO ROBLOX</button>
         </div>
-        
-        <div class="content">
-            <div class="option-card">
-                <div class="option-info">
-                    <h4>Memory Aimbot</h4>
-                    <p>ต้องคลิกขวาถึงจะล็อกเป้า (Right Click)</p>
-                </div>
-                <div class="toggle active" onclick="toggleSwitch(this)"></div>
+
+        <div class="main-layout">
+            <div class="sidebar">
+                <div class="tab-btn active">⚡ Universal Hub</div>
+                <div class="tab-btn">📝 Lua Editor</div>
+                <div class="tab-btn">☁️ Cloud Scripts</div>
+                <div class="tab-btn">⚙️ Settings</div>
             </div>
 
-            <div class="option-card">
-                <div class="option-info">
-                    <h4>Auto Headshot</h4>
-                    <p>ล็อกเป้าไปที่หัว 100%</p>
-                </div>
-                <div class="toggle" onclick="toggleSwitch(this)"></div>
-            </div>
+            <div class="content-area">
+                <div class="script-grid">
+                    
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Aimbot Universal</h4>
+                            <p>ล็อกเป้าหมายอัตโนมัติ</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'Aimbot')"></div>
+                    </div>
 
-            <div class="option-card">
-                <div class="option-info">
-                    <h4>ESP Line</h4>
-                    <p>แสดงเส้นเรดาร์ศัตรู</p>
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Player ESP</h4>
+                            <p>มองทะลุกำแพง (Name/Box)</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'ESP')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Infinite Jump</h4>
+                            <p>กระโดดได้ไม่จำกัดบนอากาศ</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'InfJump')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>WalkSpeed Slider</h4>
+                            <p>วิ่งไวขึ้น (ตั้งค่าที่ 120)</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'WalkSpeed')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Noclip (V)</h4>
+                            <p>เดินทะลุกำแพงและสิ่งของ</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'Noclip')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Fly Engine</h4>
+                            <p>บินได้อิสระ (ปุ่ม F)</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'Fly')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Teleport Tool</h4>
+                            <p>วาร์ปไปหาผู้เล่นอื่นคลิกขวา</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'Teleport')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Anti-AFK</h4>
+                            <p>ป้องกันการโดนเตะเมื่ออยู่นิ่ง</p>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleFeature(this, 'AntiAFK')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Auto Farm (Beta)</h4>
+                            <p>ฟาร์มมอนสเตอร์อัตโนมัติ</p>
+                        </div>
+                        <div class="toggle-switch" onclick="toggleFeature(this, 'AutoFarm')"></div>
+                    </div>
+
+                    <div class="func-card">
+                        <div class="func-info">
+                            <h4>Bypass Anti-Cheat</h4>
+                            <p>ซ่อนการทำงานจากระบบเกม</p>
+                        </div>
+                        <div class="toggle-switch active" onclick="toggleFeature(this, 'Bypass')"></div>
+                    </div>
+
                 </div>
-                <div class="toggle active" onclick="toggleSwitch(this)"></div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // ฟังก์ชันสำหรับทำให้ปุ่มสวิตช์เลื่อนเปิด-ปิดได้
-    function toggleSwitch(element) {
-        element.classList.toggle('active');
-    }
-</script>
+    <script>
+        // ระบบจำลองการ Inject เข้า Roblox
+        function injectRoblox() {
+            const btn = document.getElementById('injectBtn');
+            if (btn.classList.contains('injected')) return;
 
+            btn.innerText = 'INJECTING...';
+            btn.style.borderColor = '#ffa502';
+            btn.style.color = '#ffa502';
+
+            // จำลองเวลาโหลดเข้า Memory
+            setTimeout(() => {
+                btn.innerText = 'INJECTED ✅';
+                btn.classList.add('injected');
+                btn.style.borderColor = '#00ff88';
+                btn.style.boxShadow = '0 0 15px #00ff88';
+            }, 2000);
+        }
+
+        // ระบบกดปุ่มเปิด-ปิด ฟังก์ชัน (ตรงนี้แหละที่เอาไว้ส่งคำสั่งให้ Lua)
+        function toggleFeature(element, featureName) {
+            element.classList.toggle('active');
+            
+            // ตรวจสอบว่าปุ่มนั้นเปิดหรือปิดอยู่
+            const isActive = element.classList.contains('active');
+            
+            // ในการเขียนโปรแกรมของจริง คุณต้องเอา JS สื่อสารกับ Python หรือ C++ ตรงนี้ 
+            // เพื่อดึงสคริปต์ Lua มารันตามคำสั่ง
+            if(isActive) {
+                console.log(`Executing Lua script for: ${featureName} -> ON`);
+            } else {
+                console.log(`Stopping Lua script for: ${featureName} -> OFF`);
+            }
+        }
+    </script>
 </body>
 </html>
