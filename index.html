@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revezy Pro - Injector</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Kanit:wght@300;500&display=swap" rel="stylesheet">
     <style>
         :root {
             --accent: #ff2a4b;
-            --bg: rgba(10, 10, 12, 0.9);
+            --bg: rgba(15, 15, 18, 0.85);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; cursor: default; }
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: default; user-select: none; }
 
         body {
             height: 100vh;
-            background: transparent;
+            background: transparent; /* สำคัญ: ต้องโปร่งใส */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,34 +23,34 @@
             overflow: hidden;
         }
 
-        /* กล่องหลักแบบมนๆ ไม่เหลี่ยม */
+        /* กล่องโปรแกรมหลัก */
         .window {
             width: 600px;
             height: 400px;
             background: var(--bg);
-            border: 1px solid rgba(255, 42, 75, 0.3);
-            border-radius: 24px; /* ความมนระดับมือโปร */
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 42, 75, 0.1);
+            border: 1px solid rgba(255, 42, 75, 0.4);
+            border-radius: 20px; /* ขอบโค้งมนแบบแอปมือโปร */
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 42, 75, 0.1);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            backdrop-filter: blur(15px); /* พื้นหลังเบลอแบบกระจก */
+            backdrop-filter: blur(10px);
         }
 
-        /* แถบบน (Header) สำหรับลาก */
+        /* แถบด้านบน (ส่วนนี้แหละที่ทำให้เมาส์ลากได้) */
         .header {
-            height: 60px;
-            padding: 0 30px;
+            height: 55px;
+            padding: 0 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to bottom, rgba(255, 42, 75, 0.1), transparent);
+            background: linear-gradient(to bottom, rgba(255, 42, 75, 0.15), transparent);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            -webkit-app-region: drag; /* โค้ดพระเอกที่ทำให้ลากสมูท */
         }
 
         .logo {
             font-family: 'Orbitron', sans-serif;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
             color: var(--accent);
             text-shadow: 0 0 10px var(--accent);
@@ -63,71 +65,70 @@
             border-radius: 20px;
             border: 1px solid rgba(0, 255, 136, 0.3);
             text-transform: uppercase;
+            -webkit-app-region: no-drag; /* ปุ่มนี้ห้ามลาก */
         }
 
-        .main { display: flex; flex: 1; }
+        .main { display: flex; flex: 1; -webkit-app-region: no-drag; /* พื้นที่ด้านล่างทั้งหมดห้ามลาก */ }
 
-        /* Sidebar สวยๆ */
         .sidebar {
-            width: 180px;
+            width: 170px;
             padding: 20px 0;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            border-right: 1px solid rgba(255, 255, 255, 0.02);
         }
 
         .nav-link {
-            padding: 12px 30px;
-            color: #666;
+            padding: 12px 25px;
+            color: #777;
             font-size: 14px;
             transition: 0.3s;
-            border-right: 3px solid transparent;
+            border-left: 3px solid transparent;
+            cursor: pointer;
         }
 
-        .nav-link.active {
+        .nav-link.active, .nav-link:hover {
             color: #fff;
-            background: linear-gradient(to right, transparent, rgba(255, 42, 75, 0.1));
-            border-right: 3px solid var(--accent);
+            background: linear-gradient(to right, rgba(255, 42, 75, 0.15), transparent);
+            border-left: 3px solid var(--accent);
         }
 
-        /* รายการฟังก์ชัน */
         .content {
             flex: 1;
-            padding: 30px;
+            padding: 25px;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            overflow-y: auto;
         }
 
         .option-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 15px 20px;
-            border-radius: 15px;
+            border-radius: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: 0.3s;
+            transition: 0.2s;
         }
 
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateX(5px);
-        }
+        .option-card:hover { background: rgba(255, 255, 255, 0.06); }
 
-        .option-info h4 { font-size: 15px; color: #eee; }
-        .option-info p { font-size: 11px; color: #666; }
+        .option-info h4 { font-size: 15px; color: #fff; margin-bottom: 3px; }
+        .option-info p { font-size: 12px; color: #888; }
 
-        /* Toggle Switch แบบพรีเมียม */
+        /* สวิตช์เปิด-ปิด */
         .toggle {
-            width: 45px;
+            width: 44px;
             height: 22px;
-            background: #222;
+            background: #333;
             border-radius: 50px;
             position: relative;
             cursor: pointer;
             transition: 0.3s;
         }
 
-        .toggle.active { background: var(--accent); box-shadow: 0 0 15px var(--accent); }
+        .toggle.active { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
 
         .toggle::after {
             content: '';
@@ -140,7 +141,7 @@
             transition: 0.3s;
         }
 
-        .toggle.active::after { left: 26px; }
+        .toggle.active::after { left: 25px; }
 
     </style>
 </head>
@@ -148,44 +149,51 @@
 
 <div class="window">
     <div class="header">
-        <div class="logo">REVEZY PRO</div>
-        <div class="status-badge">Undetected</div>
+        <div class="logo">REVEZY ENGINE</div>
+        <div class="status-badge">🟢 UNDETECTED</div>
     </div>
     
     <div class="main">
         <div class="sidebar">
             <div class="nav-link active">🎯 AIMBOT</div>
-            <div class="nav-item nav-link">👁️ VISUALS</div>
-            <div class="nav-item nav-link">⚙️ SETTINGS</div>
+            <div class="nav-link">👁️ VISUALS</div>
+            <div class="nav-link">⚙️ SETTINGS</div>
         </div>
         
         <div class="content">
             <div class="option-card">
                 <div class="option-info">
-                    <h4>Enable Aimbot</h4>
-                    <p>Lock on enemy automatically</p>
+                    <h4>Memory Aimbot</h4>
+                    <p>ต้องคลิกขวาถึงจะล็อกเป้า (Right Click)</p>
                 </div>
-                <div class="toggle active" onclick="this.classList.toggle('active')"></div>
+                <div class="toggle active" onclick="toggleSwitch(this)"></div>
             </div>
 
             <div class="option-card">
                 <div class="option-info">
-                    <h4>Prediction Line</h4>
-                    <p>Calculate bullet travel time</p>
+                    <h4>Auto Headshot</h4>
+                    <p>ล็อกเป้าไปที่หัว 100%</p>
                 </div>
-                <div class="toggle" onclick="this.classList.toggle('active')"></div>
+                <div class="toggle" onclick="toggleSwitch(this)"></div>
             </div>
 
             <div class="option-card">
                 <div class="option-info">
-                    <h4>Smooth Level</h4>
-                    <p>Humanized mouse movement</p>
+                    <h4>ESP Line</h4>
+                    <p>แสดงเส้นเรดาร์ศัตรู</p>
                 </div>
-                <div style="color: var(--accent); font-size: 13px;">95%</div>
+                <div class="toggle active" onclick="toggleSwitch(this)"></div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // ฟังก์ชันสำหรับทำให้ปุ่มสวิตช์เลื่อนเปิด-ปิดได้
+    function toggleSwitch(element) {
+        element.classList.toggle('active');
+    }
+</script>
 
 </body>
 </html>
