@@ -2,147 +2,230 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Revezy FF Injector</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revezy Studio Injector</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
         body {
             height: 100vh;
-            background: transparent; /* สำคัญมาก: ต้องใสเพื่อให้เห็นขอบมน */
-            overflow: hidden;
-            font-family: 'Rajdhani', sans-serif;
+            background: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            color: #fff;
         }
 
-        /* ตัวหน้าต่างหลัก */
-        .injector-window {
-            width: 500px;
-            height: 350px;
-            background: rgba(15, 15, 20, 0.95);
-            border: 1px solid rgba(255, 0, 50, 0.5);
-            border-radius: 20px; /* ขอบมนที่ต้องการ */
-            box-shadow: 0 0 30px rgba(255, 0, 50, 0.3);
+        /* เอฟเฟกต์กรอบหลักตอนเปิดโปรแกรม */
+        @keyframes bootUp {
+            0% { transform: scale(0.8); opacity: 0; box-shadow: 0 0 0 rgba(255, 0, 50, 0); }
+            50% { box-shadow: 0 0 50px rgba(255, 0, 50, 0.5); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .container {
+            width: 600px;
+            height: 420px;
+            background: linear-gradient(135deg, rgba(10,10,15,0.95) 0%, rgba(25,5,10,0.95) 100%);
+            border: 2px solid rgba(255, 0, 50, 0.4);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 50, 0.3), inset 0 0 15px rgba(255, 0, 50, 0.1);
             display: flex;
             flex-direction: column;
-            overflow: hidden;
+            animation: bootUp 0.6s ease-out forwards;
             position: relative;
         }
 
-        /* แถบด้านบนสำหรับลาก */
+        /* แถบ Header */
         .header {
-            height: 45px;
-            background: linear-gradient(90deg, #1a1a2e, #2d0a0e);
+            height: 50px;
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 2px solid rgba(255, 0, 50, 0.5);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid rgba(255, 0, 50, 0.3);
-            -webkit-app-region: drag; /* ทำให้ลากหน้าต่างได้ในบางระบบ */
+            border-radius: 13px 13px 0 0;
+            pointer-events: none; /* ให้เมาส์ทะลุไปจับ Python ลากได้ */
         }
 
-        .title {
+        .brand-name {
             font-family: 'Orbitron', sans-serif;
-            font-size: 13px;
+            font-size: 18px;
+            font-weight: 900;
             color: #ff2a4b;
-            text-shadow: 0 0 10px #ff2a4b;
-            letter-spacing: 2px;
+            text-shadow: 0 0 8px #ff2a4b, 0 0 15px #ff2a4b;
+            letter-spacing: 3px;
         }
 
-        .content { display: flex; flex: 1; }
+        .status {
+            font-size: 14px;
+            color: #00ff88;
+            text-shadow: 0 0 5px #00ff88;
+            animation: blink 2s infinite;
+        }
 
-        /* เมนูซ้าย */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ส่วนเนื้อหา */
+        .main-content {
+            display: flex;
+            height: calc(100% - 50px);
+        }
+
+        /* แถบเมนูด้านซ้าย */
         .sidebar {
-            width: 130px;
-            background: rgba(0, 0, 0, 0.3);
-            border-right: 1px solid rgba(255, 0, 50, 0.1);
-            padding-top: 10px;
+            width: 160px;
+            background: rgba(0, 0, 0, 0.4);
+            border-right: 1px solid rgba(255, 0, 50, 0.2);
+            padding: 20px 0;
+            pointer-events: auto;
         }
 
-        .tab {
-            padding: 15px;
-            font-size: 15px;
-            color: #666;
+        .nav-item {
+            padding: 15px 20px;
+            font-size: 16px;
+            color: #888;
             cursor: pointer;
-            border-left: 3px solid transparent;
-            transition: 0.2s;
+            transition: 0.3s;
+            border-left: 4px solid transparent;
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .tab.active {
+        .nav-item.active, .nav-item:hover {
             color: #fff;
-            background: rgba(255, 0, 50, 0.1);
-            border-left: 3px solid #ff2a4b;
+            background: rgba(255, 0, 50, 0.15);
+            border-left: 4px solid #ff2a4b;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
-        /* ฟังก์ชันขวา */
-        .features { flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 15px; }
+        /* แถบฟังก์ชัน */
+        .functions {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            pointer-events: auto;
+        }
 
-        .feature-item {
+        .func-box {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 12px 18px;
-            border-radius: 10px;
-        }
-
-        /* Switch UI */
-        .switch {
-            position: relative;
-            width: 40px;
-            height: 20px;
-            appearance: none;
-            background: #333;
-            outline: none;
-            border-radius: 20px;
+            background: rgba(20, 20, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
             transition: 0.3s;
-            cursor: pointer;
         }
 
-        .switch:checked { background: #ff2a4b; box-shadow: 0 0 10px #ff2a4b; }
+        .func-box:hover {
+            background: rgba(30, 10, 15, 0.8);
+            border-color: rgba(255, 0, 50, 0.3);
+            box-shadow: 0 0 15px rgba(255, 0, 50, 0.1);
+        }
 
-        .switch::before {
+        .func-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .func-name { font-size: 18px; font-weight: bold; color: #eee; }
+        .func-desc { font-size: 12px; color: #777; margin-top: 5px; }
+
+        /* ปุ่ม Switch แบบโหดๆ */
+        .cyber-switch {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: #222;
+            border-radius: 12px;
+            border: 1px solid #444;
+            cursor: pointer;
+            appearance: none;
+            outline: none;
+            transition: 0.4s;
+        }
+
+        .cyber-switch:checked {
+            background: #ff2a4b;
+            border-color: #ff2a4b;
+            box-shadow: 0 0 15px #ff2a4b;
+        }
+
+        .cyber-switch::before {
             content: '';
             position: absolute;
             width: 16px;
             height: 16px;
+            background: #666;
             border-radius: 50%;
-            top: 2px; left: 2px;
-            background: #fff;
-            transition: 0.3s;
+            top: 3px;
+            left: 3px;
+            transition: 0.4s;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.5);
         }
 
-        .switch:checked::before { left: 22px; }
+        .cyber-switch:checked::before {
+            left: 29px;
+            background: #fff;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.5), 0 0 10px #fff;
+        }
     </style>
 </head>
 <body>
 
-    <div class="injector-window">
+    <div class="container">
         <div class="header">
-            <div class="title">REVEZY EXTERNAL V1.0</div>
-            <div style="color: #444; font-size: 12px;">✖</div>
+            <div class="brand-name">REVEZY STUDIO</div>
+            <div class="status">● INJECTED</div>
         </div>
 
-        <div class="content">
+        <div class="main-content">
             <div class="sidebar">
-                <div class="tab active">MAIN</div>
-                <div class="tab">VISUAL</div>
-                <div class="tab">MISC</div>
+                <div class="nav-item active">AIMBOT</div>
+                <div class="nav-item">VISUALS</div>
+                <div class="nav-item">EXPLOITS</div>
+                <div class="nav-item">SETTINGS</div>
             </div>
-            <div class="features">
-                <div class="feature-item">
-                    <span>Aimbot (Right Click)</span>
-                    <input type="checkbox" class="switch" checked>
+
+            <div class="functions">
+                <div class="func-box">
+                    <div class="func-details">
+                        <span class="func-name">Memory Aimbot</span>
+                        <span class="func-desc">Lock target on Right Click</span>
+                    </div>
+                    <input type="checkbox" class="cyber-switch" checked>
                 </div>
-                <div class="feature-item">
-                    <span>Auto Headshot</span>
-                    <input type="checkbox" class="switch">
+
+                <div class="func-box">
+                    <div class="func-details">
+                        <span class="func-name">Auto Headshot</span>
+                        <span class="func-desc">Force bullets to head bone (Risky)</span>
+                    </div>
+                    <input type="checkbox" class="cyber-switch">
                 </div>
-                <div class="feature-item">
-                    <span>ESP Line</span>
-                    <input type="checkbox" class="switch">
+
+                <div class="func-box">
+                    <div class="func-details">
+                        <span class="func-name">ESP Skeleton</span>
+                        <span class="func-desc">Draw enemy bones behind walls</span>
+                    </div>
+                    <input type="checkbox" class="cyber-switch" checked>
+                </div>
+
+                <div class="func-box">
+                    <div class="func-details">
+                        <span class="func-name">Antenna Head</span>
+                        <span class="func-desc">Long line from enemy head to sky</span>
+                    </div>
+                    <input type="checkbox" class="cyber-switch">
                 </div>
             </div>
         </div>
